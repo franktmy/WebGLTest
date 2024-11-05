@@ -7,33 +7,6 @@
     <link rel="shortcut icon" href="TemplateData/favicon.ico">
     <link rel="stylesheet" href="TemplateData/style.css">
 <script>
-function Reset()
-      {
-		var bIsMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
-		var offset = bIsMobile ? 4 :50; 
-          var canvas = document.getElementById("unity-canvas");//获取#canvas
-	
-          var h=  document.documentElement.clientHeight - offset;//获取body可见区域高度
-          var w =  document.documentElement.clientWidth - offset;//获取body可见区域高度
-
-	var width =  1920;
-	var height = 1080;
-        var bi = 1080/1920;
-
-	if(width > w)
-	{
-		width = w
-		height = width * bi;
-	}		
-	if(height > h)
-        {
-		height = h;
-		width = height / bi;
-	}
-console.log(width);
-         canvas.style.width = width + "px";
-          canvas.style.height= height + "px";
-      }
 </script>
   </head>
   <body onload="Reset()" onresize="Reset()">
@@ -84,9 +57,9 @@ console.log(width);
       var loaderUrl = buildUrl + "/WebGLTest.loader.js";
       var config = {
         arguments: [],
-        dataUrl: buildUrl + "/WebGLTest.data.unityweb",
-        frameworkUrl: buildUrl + "/WebGLTest.framework.js.unityweb",
-        codeUrl: buildUrl + "/WebGLTest.wasm.unityweb",
+        dataUrl: buildUrl + "/WebGLTest.data",
+        frameworkUrl: buildUrl + "/WebGLTest.framework.js",
+        codeUrl: buildUrl + "/WebGLTest.wasm",
         streamingAssetsUrl: "StreamingAssets",
         companyName: "DefaultCompany",
         productName: "ProjectX",
@@ -134,12 +107,55 @@ console.log(width);
 
       document.querySelector("#unity-loading-bar").style.display = "block";
 
+ var gameInstance = null;
+var ResetSolution = "";
+function Reset()
+      {
+		var bIsMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)
+		var offset = bIsMobile ? 4 :50; 
+          var canvas = document.getElementById("unity-canvas");//获取#canvas
+	
+          var h=  document.documentElement.clientHeight - offset;//获取body可见区域高度
+          var w =  document.documentElement.clientWidth - offset;//获取body可见区域高度
+
+	var width =  1920;
+	var height = 1080;
+        var bi = 1080/1920;
+
+	if(width > w)
+	{
+		width = w
+		height = width * bi;
+	}		
+	if(height > h)
+        {
+		height = h;
+		width = height / bi;
+	}
+
+console.log(width);
+         canvas.style.width = width + "px";
+          canvas.style.height= height + "px";
+
+	ResetSolution=width + ":" + height;
+if(gameInstance)
+ 	gameInstance.SendMessage("GameManager","ResetSolution",ResetSolution);
+      }
+
       var script = document.createElement("script");
       script.src = loaderUrl;
       script.onload = () => {
         createUnityInstance(canvas, config, (progress) => {
           document.querySelector("#unity-progress-bar-full").style.width = 100 * progress + "%";
               }).then((unityInstance) => {
+		gameInstance=unityInstance;
+
+setTimeout(function(){
+console.log("重置分辨率");
+    // 延迟调用的方法
+   gameInstance.SendMessage("GameManager","ResetSolution",ResetSolution);
+  }, 3000);
+		
                 document.querySelector("#unity-loading-bar").style.display = "none";
                 document.querySelector("#unity-fullscreen-button").onclick = () => {
                   unityInstance.SetFullscreen(1);
